@@ -1,11 +1,11 @@
-const Row = ({ onChange, onRemove, option }) => {
+const Row = ({ onRemove, name, onChange }) => {
   return (
     <div>
       <input
+        name={name}
         type='text'
-        value={option}
-        onChange={e => onChange('option', e.target.value)}
         placeholder='Opcion'
+        onChange={e => onChange('option', e.target.value)}
       />
       <button onClick={onRemove}>Eliminar</button>
     </div>

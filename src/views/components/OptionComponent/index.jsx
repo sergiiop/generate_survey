@@ -2,19 +2,18 @@ import { useState } from 'react'
 import { Row } from '../Row'
 
 const defaultState = {
+  idx: 1,
   option: ''
 }
 
 const defaultStateQuestion = {
   name: '',
-  type: '',
-  answer: []
+  type: ''
 }
 
 const OptionComponent = ({ submit, setTrigger }) => {
-  const [saveOptions, setSaveOptions] = useState(false)
+  // const [saveOptions, setSaveOptions] = useState(false)
   const [question, setQuestion] = useState(defaultStateQuestion)
-
   const [options, setOptions] = useState([defaultState])
 
   const handleOnChange = (index, name, value) => {
@@ -24,10 +23,20 @@ const OptionComponent = ({ submit, setTrigger }) => {
       [name]: value
     }
     setOptions(copyOptions)
+    // setOptions(state => [
+    //   (state[index] = {
+    //     ...state[index],
+    //     [name]: value
+    //   })
+    // ])
   }
 
   const handleOnAdd = () => {
-    setOptions(options.concat(defaultState))
+    const newOption = {
+      idx: options[options.length - 1].idx + 1,
+      option: ''
+    }
+    setOptions([...options, newOption])
   }
 
   const handleOnRemove = index => {
@@ -43,19 +52,28 @@ const OptionComponent = ({ submit, setTrigger }) => {
     }))
   }
 
-  const handleSaveOptions = () => {
-    setQuestion(state => ({
-      ...state,
-      answer: options
-    }))
-    setSaveOptions(true)
+  // const handleSaveOptions = () => {
+  //   setQuestion(state => ({
+  //     ...state,
+  //     answer: options
+  //   }))
+  //   setSaveOptions(true)
+  // }
+  const handleCerrar = () => {
+    setTrigger(false)
   }
 
   const handleSubmit = e => {
     e.preventDefault()
-
-    submit(question)
-    setTrigger(false)
+    const data = Array.from(new FormData(e.target))
+    const newQuestion = Object.fromEntries(data)
+    const addQuestion = {
+      name: newQuestion.name,
+      type: newQuestion.type,
+      options
+    }
+    submit(addQuestion)
+    handleCerrar()
   }
 
   return (
@@ -71,13 +89,14 @@ const OptionComponent = ({ submit, setTrigger }) => {
         value={question.name}
         onChange={handleChange}
       />
+
       {question.type === 'combo' &&
         options.map((option, index) => (
           <Row
-            {...option}
-            key={index}
+            name={`option_${option.idx}`}
+            key={option.idx}
+            onRemove={() => handleOnRemove(option.idx)}
             onChange={(name, value) => handleOnChange(index, name, value)}
-            onRemove={() => handleOnRemove(index)}
           />
         ))}
       <button
@@ -87,12 +106,10 @@ const OptionComponent = ({ submit, setTrigger }) => {
       >
         Agregar opcion
       </button>
-      <button hidden={saveOptions} type='button' onClick={handleSaveOptions}>
-        Guardar Opciones
-      </button>
-      <button hidden={!saveOptions} type='submit'>
-        Guardar Pregunta
-      </button>
+      <div>
+        <button>Guardar Pregunta</button>
+        <button onClick={handleCerrar}>Cancelar</button>
+      </div>
     </form>
   )
 }

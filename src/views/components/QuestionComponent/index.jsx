@@ -3,26 +3,29 @@ import { OptionComponent } from '../OptionComponent'
 import { Popup } from '../Popup'
 
 const QuestionComponent = () => {
-  const [saveQuestions, setSaveQuestions] = useState(false)
+  // const [saveQuestions, setSaveQuestions] = useState(false)
+  const [surveis, setSurveis] = useState([])
   const [survey, setSurvey] = useState({
     name: '',
-    description: '',
-    questions: []
+    description: ''
   })
   const [questions, setQuestions] = useState([])
   const [buttonQuestion, setButtonQuestion] = useState(false)
 
-  const submit = question => {
+  const handleButtonQuestion = () => {
+    setButtonQuestion(true)
+  }
+  const submitQuestions = question => {
     setQuestions([...questions, question])
   }
 
-  const handleSaveQuestions = () => {
-    setSurvey(state => ({
-      ...state,
-      questions: questions
-    }))
-    setSaveQuestions(true)
-  }
+  // const handleSaveQuestions = () => {
+  //   setSurvey(state => ({
+  //     ...state,
+  //     questions: questions
+  //   }))
+  //   setSaveQuestions(true)
+  // }
 
   const handleChange = ({ target }) => {
     setSurvey({
@@ -30,6 +33,16 @@ const QuestionComponent = () => {
       [target.name]: target.value
     })
   }
+
+  const handleSubmit = () => {
+    const newSurvey = {
+      name: survey.name,
+      description: survey.description,
+      questions
+    }
+    setSurveis([...surveis, newSurvey])
+  }
+  console.log(surveis)
 
   return (
     <>
@@ -48,12 +61,13 @@ const QuestionComponent = () => {
         onChange={handleChange}
       />
       <div className='btn-container'>
-        <button onClick={() => setButtonQuestion(true)}>
-          Agregar Pregunta
-        </button>
+        <button onClick={handleButtonQuestion}>Agregar Pregunta</button>
       </div>
       <Popup trigger={buttonQuestion} setTrigger={setButtonQuestion}>
-        <OptionComponent setTrigger={setButtonQuestion} submit={submit} />
+        <OptionComponent
+          setTrigger={setButtonQuestion}
+          submit={submitQuestions}
+        />
       </Popup>
       {questions &&
         questions.length > 0 &&
@@ -61,19 +75,16 @@ const QuestionComponent = () => {
           <div key={index}>
             <h1>{question.name}</h1>
             {question.type === 'combo' &&
-              question.answer.map((option, index) => {
+              question.options.map(option => {
                 return (
-                  <div key={index}>
+                  <div key={option.idx}>
                     <h2>{option.option}</h2>
                   </div>
                 )
               })}
           </div>
         ))}
-      <button hidden={saveQuestions} onClick={handleSaveQuestions}>
-        Guardar Preguntas
-      </button>
-      <button hidden={!saveQuestions}>Guardar Pregunta</button>
+      <button onClick={handleSubmit}>Guardar encuesta</button>
     </>
   )
 }
