@@ -1,83 +1,85 @@
 import { useState } from 'react'
-import { Row } from '../Row'
 
-const defaultState = {
-  idx: 1,
-  option: ''
-}
+// const defaultState = {
+//   idx: 1,
+//   option: ''
+// }
 
 const defaultStateQuestion = {
   name: '',
-  type: ''
+  type: '',
+  answers: []
 }
+
+let key = 0
 
 const OptionComponent = ({ submit, setTrigger }) => {
   // const [saveOptions, setSaveOptions] = useState(false)
   const [question, setQuestion] = useState(defaultStateQuestion)
-  const [options, setOptions] = useState([defaultState])
+  // const [options, setOptions] = useState([defaultState])
 
-  const handleOnChange = (index, name, value) => {
-    const copyOptions = [...options]
-    copyOptions[index] = {
-      ...copyOptions[index],
-      [name]: value
-    }
-    setOptions(copyOptions)
-    // setOptions(state => [
-    //   (state[index] = {
-    //     ...state[index],
-    //     [name]: value
-    //   })
-    // ])
-  }
-
-  const handleOnAdd = () => {
-    const newOption = {
-      idx: options[options.length - 1].idx + 1,
-      option: ''
-    }
-    setOptions([...options, newOption])
-  }
-
-  const handleOnRemove = index => {
-    const copyOptions = [...options]
-    copyOptions.splice(index, 1)
-    setOptions(copyOptions)
+  function handleEdit(modifiedOption) {
+    setQuestion((question) => {
+      // @TODO: Should implement
+      const updatedAnswers = question.answers.map((originalOption) =>
+        originalOption.idx === modifiedOption.idx
+          ? modifiedOption
+          : originalOption
+      )
+      return {
+        ...question,
+        answers: updatedAnswers
+      }
+    })
   }
 
   const handleChange = ({ target }) => {
-    setQuestion(state => ({
+    setQuestion((state) => ({
       ...state,
       [target.name]: target.value
     }))
   }
 
-  // const handleSaveOptions = () => {
-  //   setQuestion(state => ({
-  //     ...state,
-  //     answer: options
-  //   }))
-  //   setSaveOptions(true)
-  // }
+  const handleRemove = (optionToRemove) => {
+    setQuestion((question) => {
+      const removedAnswer = question.answers.filter(
+        (originalOption) => originalOption.idx !== optionToRemove.idx
+      )
+      return {
+        ...question,
+        answers: removedAnswer
+      }
+    })
+  }
+
+  const handleAdd = () => {
+    setQuestion((question) => {
+      const addAnswer = question.answers.concat({
+        idx: ++key,
+        option: ''
+      })
+      return {
+        ...question,
+        answers: addAnswer
+      }
+    })
+  }
+
   const handleCerrar = () => {
     setTrigger(false)
   }
 
-  const handleSubmit = e => {
-    e.preventDefault()
-    const data = Array.from(new FormData(e.target))
-    const newQuestion = Object.fromEntries(data)
-    const addQuestion = {
-      name: newQuestion.name,
-      type: newQuestion.type,
-      options
-    }
-    submit(addQuestion)
-    handleCerrar()
+  const savedQuestion = () => {
+    submit(question)
+    setTrigger(false)
+  }
+
+  const handleSaved = () => {
+    savedQuestion()
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div>
       <select name='type' value={question.type} onChange={handleChange}>
         <option value=''>-- Seleccione --</option>
         <option value='texto'>Texto</option>
@@ -91,26 +93,36 @@ const OptionComponent = ({ submit, setTrigger }) => {
       />
 
       {question.type === 'combo' &&
-        options.map((option, index) => (
-          <Row
-            name={`option_${option.idx}`}
-            key={option.idx}
-            onRemove={() => handleOnRemove(option.idx)}
-            onChange={(name, value) => handleOnChange(index, name, value)}
-          />
+        question.answers.map((option) => (
+          <div key={option.idx}>
+            <input
+              type='text'
+              name='answers'
+              value={option.option}
+              placeholder='Opcion'
+              onChange={(e) =>
+                handleEdit({ idx: option.idx, option: e.target.value })
+              }
+            />
+            <button onClick={() => handleRemove(option)}>Eliminar</button>
+          </div>
         ))}
       <button
         type='button'
         hidden={question.type !== 'combo'}
-        onClick={handleOnAdd}
+        onClick={handleAdd}
       >
         Agregar opcion
       </button>
       <div>
-        <button>Guardar Pregunta</button>
-        <button onClick={handleCerrar}>Cancelar</button>
+        <button type='button' onClick={handleSaved}>
+          Guardar Pregunta
+        </button>
+        <button type='button' onClick={handleCerrar}>
+          Cancelar
+        </button>
       </div>
-    </form>
+    </div>
   )
 }
 

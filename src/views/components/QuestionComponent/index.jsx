@@ -1,31 +1,35 @@
 import { useState } from 'react'
 import { OptionComponent } from '../OptionComponent'
 import { Popup } from '../Popup'
+import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { createNewSurvey } from '../../../store/actions/surveys'
+
+const initialState = {
+  name: '',
+  description: '',
+  questions: []
+}
 
 const QuestionComponent = () => {
-  // const [saveQuestions, setSaveQuestions] = useState(false)
-  const [surveis, setSurveis] = useState([])
-  const [survey, setSurvey] = useState({
-    name: '',
-    description: ''
-  })
-  const [questions, setQuestions] = useState([])
+  const [survey, setSurvey] = useState(initialState)
   const [buttonQuestion, setButtonQuestion] = useState(false)
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const handleButtonQuestion = () => {
     setButtonQuestion(true)
   }
-  const submitQuestions = question => {
-    setQuestions([...questions, question])
-  }
 
-  // const handleSaveQuestions = () => {
-  //   setSurvey(state => ({
-  //     ...state,
-  //     questions: questions
-  //   }))
-  //   setSaveQuestions(true)
-  // }
+  const submitQuestions = (questions) => {
+    setSurvey((survey) => {
+      const addQuestions = survey.questions.concat(questions)
+      return {
+        ...survey,
+        questions: addQuestions
+      }
+    })
+  }
 
   const handleChange = ({ target }) => {
     setSurvey({
@@ -34,18 +38,13 @@ const QuestionComponent = () => {
     })
   }
 
-  const handleSubmit = () => {
-    const newSurvey = {
-      name: survey.name,
-      description: survey.description,
-      questions
-    }
-    setSurveis([...surveis, newSurvey])
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    dispatch(createNewSurvey(survey, navigate))
   }
-  console.log(surveis)
 
   return (
-    <>
+    <form onSubmit={handleSubmit}>
       <label>Nombre de la encuesta</label>
       <input
         name='name'
@@ -61,7 +60,9 @@ const QuestionComponent = () => {
         onChange={handleChange}
       />
       <div className='btn-container'>
-        <button onClick={handleButtonQuestion}>Agregar Pregunta</button>
+        <button type='button' onClick={handleButtonQuestion}>
+          Agregar Pregunta
+        </button>
       </div>
       <Popup trigger={buttonQuestion} setTrigger={setButtonQuestion}>
         <OptionComponent
@@ -69,13 +70,13 @@ const QuestionComponent = () => {
           submit={submitQuestions}
         />
       </Popup>
-      {questions &&
-        questions.length > 0 &&
-        questions.map((question, index) => (
+      {survey.questions &&
+        survey.questions.length > 0 &&
+        survey.questions.map((question, index) => (
           <div key={index}>
             <h1>{question.name}</h1>
             {question.type === 'combo' &&
-              question.options.map(option => {
+              question.answers.map((option) => {
                 return (
                   <div key={option.idx}>
                     <h2>{option.option}</h2>
@@ -84,8 +85,8 @@ const QuestionComponent = () => {
               })}
           </div>
         ))}
-      <button onClick={handleSubmit}>Guardar encuesta</button>
-    </>
+      <button type='submit'>Guardar encuesta</button>
+    </form>
   )
 }
 

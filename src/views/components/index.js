@@ -1,8 +1,14 @@
 import { QuestionComponent } from './QuestionComponent'
+import Header from './Header'
+import { AuthComponent } from './AuthComponent'
+import Surveys from './Surveys'
 
 const useComponents = () => {
   return {
-    QuestionComponent
+    QuestionComponent,
+    Header,
+    AuthComponent,
+    Surveys
   }
 }
 
