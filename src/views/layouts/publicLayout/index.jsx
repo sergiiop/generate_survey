@@ -1,8 +1,12 @@
+import { useComponents } from '../../components'
+import { MainContainer } from './styled'
+
 const PublicLayout = ({ children }) => {
+  const { Header } = useComponents()
   return (
     <>
-      <h1>Generador de consultas</h1>
-      {children}
+      <Header />
+      <MainContainer className='container'>{children}</MainContainer>
     </>
   )
 }
